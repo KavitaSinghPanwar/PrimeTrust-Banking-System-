@@ -122,6 +122,8 @@ This project is for educational purposes.
 ## 👩‍💻 Author
 
 **Kavita Singh Panwar**
+**Priyanshi**
+**Khushi Tiwari**
 
 GitHub: https://github.com/KavitaSinghPanwar  
 Email: kavitasinghpanwar33@gmail.com
