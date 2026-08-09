@@ -37,7 +37,7 @@ def register(request):
         name_parts = full_name.strip().split(" ", 1)
         first_name = name_parts[0]
         last_name = name_parts[1] if len(name_parts) > 1 else ""
-
+        print("CREATING USER:", username)
         user = User.objects.create_user(
             username=username,
             email=email,
@@ -45,6 +45,7 @@ def register(request):
             first_name=first_name,
             last_name=last_name
         )
+        print("USER CREATED SUCCESSFULLY:", user.username)
 
         # ✅ SET ROLE PROPERLY
         if role == "employee":
@@ -66,26 +67,43 @@ def register(request):
 
 
 
+from django.contrib.auth.models import User
+
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.shortcuts import render, redirect
+
 def login_view(request):
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get("username")
+        password = request.POST.get("password")
 
-        user = authenticate(username=username, password=password)
+        print("LOGIN ATTEMPT:", username)
 
-        if user:
-            # Store user ID in session for 2FA step
-            request.session['pending_user_id'] = user.id
-            generate_otp(user)
-            messages.info(request, "An OTP has been sent to your registered email and phone.")
-            return redirect('verify_otp')
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        )
+
+        print("AUTH RESULT:", user)
+
+        if user is not None:
+            login(request, user)
+
+            # Role-based redirect
+            if user.is_superuser:
+                return redirect('admin_dashboard')
+            elif user.is_staff:
+                return redirect('employee_dashboard')
+            else:
+                return redirect('customer_dashboard')
 
         return render(request, "login.html", {
             "error": "Invalid Credentials ❌"
         })
 
     return render(request, "login.html")
-
 
 def generate_otp(user):
     otp = random.randint(100000, 999999)
@@ -105,18 +123,20 @@ def generate_otp(user):
     phone = profile.phone if profile else 'N/A'
     print(f"[SMS] Simulated SMS to {phone}: Your PrimeTrust OTP is {otp}. Valid for 60 seconds.")
 
-    try:
+    #try:
         # Use settings.EMAIL_HOST_USER explicitly as from_email
-        send_mail(
-            'Your PrimeTrust OTP Code',
-            f'Hello {user.username},\n\nYour OTP for secure login is: {otp}\n\nThis code will expire in 60 seconds.\n\nRegards,\nPrimeTrust Bank',
-            settings.EMAIL_HOST_USER,
-            [user.email],
-            fail_silently=False,
-        )
-        print(f"Email sent successfully to {user.email} from {settings.EMAIL_HOST_USER}")
-    except Exception as e:
-        print(f"Email failed to send: {e}")
+       # send_mail(
+        #    'Your PrimeTrust OTP Code',
+         #   f'Hello {user.username},\n\nYour OTP for secure login is: {otp}\n\nThis code will expire in 60 seconds.\n\nRegards,\nPrimeTrust Bank',
+          #  settings.EMAIL_HOST_USER,
+           # [user.email],
+            #fail_silently=True,
+        #)
+         # print(f"Email sent successfully to {user.email} from {settings.# EMAIL_HOST_USER}")
+    #except Exception as e:
+
+
+     #   print(f"Email failed to send: {e}")
 
 
 def verify_otp(request):
