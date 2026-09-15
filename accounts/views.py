@@ -78,20 +78,15 @@ def login_view(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        print("LOGIN ATTEMPT:", username)
-
         user = authenticate(
             request,
             username=username,
             password=password
         )
 
-        print("AUTH RESULT:", user)
-
         if user is not None:
             login(request, user)
 
-            # Role-based redirect
             if user.is_superuser:
                 return redirect('admin_dashboard')
             elif user.is_staff:
@@ -104,6 +99,11 @@ def login_view(request):
         })
 
     return render(request, "login.html")
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 def generate_otp(user):
     otp = random.randint(100000, 999999)
