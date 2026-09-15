@@ -11,12 +11,11 @@ SECRET_KEY = os.environ.get(
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # ✅ FIXED
-ALLOWED_HOSTS = os.environ.get(
-  "primetrust-banking-system-1.onrender.com",
-    'ALLOWED_HOSTS',
-    '127.0.0.1,localhost'
-).split(',')
-
+ALLOWED_HOSTS = [
+    "primetrust-banking-system-1.onrender.com",
+    "127.0.0.1",
+    "localhost",
+]
 
 # ---------------- INSTALLED APPS ---------------- #
 
